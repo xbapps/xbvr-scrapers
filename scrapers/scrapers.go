@@ -9,6 +9,7 @@ import (
 	"io/ioutil"
 	"os"
 	"path"
+	"regexp"
 	"strings"
 	"time"
 
@@ -142,27 +143,26 @@ func unCache(URL string, cacheDir string) {
 }
 
 func Scraper() {
-	jsonFile, err := os.Open("scrapers/wetvr.json")
-	if err != nil {
-		fmt.Println(err)
-	}
-	defer jsonFile.Close()
+	var re = regexp.MustCompile(`(?ms)^/\* scraper-config(.*)scraper-config \*/$`)
 
-	jsonBytes, _ := ioutil.ReadAll(jsonFile)
+	scraperFile, err := ioutil.ReadFile("scrapers/wetvr.tengo")
+	if err != nil {
+		panic(err)
+	}
+
+	scraperConfig := re.FindSubmatch(scraperFile)
+	fmt.Printf("%v", scraperConfig)
+	if len(scraperConfig) == 0 {
+		panic("Scraper contains no configuration JSON!")
+	}
+
 	var scraper ScraperDefinition
-	json.Unmarshal(jsonBytes, &scraper)
+	json.Unmarshal(scraperConfig[1], &scraper)
 
 	sceneCollector := createCollector(scraper.AllowedDomains...)
 	siteCollector := createCollector(scraper.AllowedDomains...)
 
-	scraperCode, err := os.Open("scrapers/wetvr.tengo")
-	if err != nil {
-		fmt.Println(err)
-	}
-	defer scraperCode.Close()
-
-	codeBytes, _ := ioutil.ReadAll(scraperCode)
-	script := tengo.NewScript(codeBytes)
+	script := tengo.NewScript(scraperFile)
 	script.SetImports(stdlib.GetModuleMap("fmt", "text", "times"))
 
 	sceneCollector.OnHTML(scraper.SceneOnhtml.Selector, func(e *colly.HTMLElement) {
