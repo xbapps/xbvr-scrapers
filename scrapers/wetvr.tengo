@@ -1,0 +1,25 @@
+fmt := import("fmt")
+text := import("text")
+times := import("times")
+
+homepageURL := text.split(url, "?")[0]
+
+tmp := text.split(homepageURL, "/")
+siteID := tmp[len(tmp)-1]
+title := text.trim_space(titleText)
+
+fmt.println(dateDuration)
+
+duration := text.atoi(text.trim_space(text.replace(dateDuration, "minutes", "", -1)))
+
+coverURL := coverSrc || coverSrcAlt
+galleryURLS := galleryImgs
+
+//sc.Synopsis = strings.TrimSpace(e.ChildText(`div#t2019-description`))
+synopsis := text.trim_space(synopsisText)
+
+for i, v in castText {
+    castText[i] = text.trim_space(v)
+}
+
+cast := castText
