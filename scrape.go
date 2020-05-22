@@ -142,7 +142,7 @@ func unCache(URL string, cacheDir string) {
 }
 
 func Scrape(configFile string, parserFile string) {
-	scraperConfig, err := ioutil.ReadFile("scrapers/wetvr/config.json")
+	scraperConfig, err := ioutil.ReadFile(configFile)
 	if err != nil {
 		panic(err)
 	}
@@ -153,7 +153,7 @@ func Scrape(configFile string, parserFile string) {
 	sceneCollector := createCollector(scraper.AllowedDomains...)
 	siteCollector := createCollector(scraper.AllowedDomains...)
 
-	scraperParser, err := ioutil.ReadFile("scrapers/wetvr/wetvr.tengo")
+	scraperParser, err := ioutil.ReadFile(parserFile)
 	if err != nil {
 		panic(err)
 	}
