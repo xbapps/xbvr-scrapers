@@ -1,4 +1,4 @@
-package scrapers
+package main
 
 import (
 	"context"
@@ -9,7 +9,6 @@ import (
 	"io/ioutil"
 	"os"
 	"path"
-	"regexp"
 	"strings"
 	"time"
 
@@ -78,7 +77,7 @@ func arrayToInterface(a []string) []interface{} {
 func interfaceToArray(i []interface{}) []string {
 	var s []string
 	for _, x := range i {
-		s = append(s, x.(string))
+		s = append(s, strings.TrimSpace(x.(string)))
 	}
 	return s
 }
@@ -142,49 +141,40 @@ func unCache(URL string, cacheDir string) {
 	}
 }
 
-func Scraper() {
-	var re = regexp.MustCompile(`(?ms)^/\* scraper-config(.*)scraper-config \*/$`)
-
-	scraperFile, err := ioutil.ReadFile("scrapers/wetvr.tengo")
+func Scrape(configFile string, parserFile string) {
+	scraperConfig, err := ioutil.ReadFile("scrapers/wetvr/config.json")
 	if err != nil {
 		panic(err)
 	}
 
-	scraperConfig := re.FindSubmatch(scraperFile)
-	fmt.Printf("%v", scraperConfig)
-	if len(scraperConfig) == 0 {
-		panic("Scraper contains no configuration JSON!")
-	}
-
 	var scraper ScraperDefinition
-	json.Unmarshal(scraperConfig[1], &scraper)
+	json.Unmarshal(scraperConfig, &scraper)
 
 	sceneCollector := createCollector(scraper.AllowedDomains...)
 	siteCollector := createCollector(scraper.AllowedDomains...)
 
-	script := tengo.NewScript(scraperFile)
+	scraperParser, err := ioutil.ReadFile("scrapers/wetvr/wetvr.tengo")
+	if err != nil {
+		panic(err)
+	}
+	script := tengo.NewScript(scraperParser)
 	script.SetImports(stdlib.GetModuleMap("fmt", "text", "times"))
 
 	sceneCollector.OnHTML(scraper.SceneOnhtml.Selector, func(e *colly.HTMLElement) {
 		scene := ScrapedScene{}
-		fmt.Println("Scene selector found. Parsing scene...")
 		for _, v := range scraper.SceneOnhtml.NeededVars {
 			switch v.CollyMethod {
 			case "ChildText":
 				val := e.ChildText(v.CollyArgs[0])
-				fmt.Println("Adding var: ", v.VarName, val)
 				_ = script.Add(v.VarName, val)
 			case "ChildTexts":
 				val := e.ChildTexts(v.CollyArgs[0])
-				fmt.Println("Adding var: ", v.VarName, arrayToInterface(val))
 				_ = script.Add(v.VarName, arrayToInterface(val))
 			case "ChildAttr":
 				val := e.ChildAttr(v.CollyArgs[0], v.CollyArgs[1])
-				fmt.Println("Adding var: ", v.VarName, val)
 				_ = script.Add(v.VarName, val)
 			case "ChildAttrs":
 				val := e.ChildAttrs(v.CollyArgs[0], v.CollyArgs[1])
-				fmt.Println("Adding var: ", v.VarName, arrayToInterface(val))
 				_ = script.Add(v.VarName, arrayToInterface(val))
 			}
 		}
@@ -199,17 +189,17 @@ func Scraper() {
 		scene.SceneType = "VR"
 		scene.Studio = scraper.Studio
 		scene.Site = scraper.SiteID
-		scene.SiteID = parsed.Get("siteID").String()
+		scene.SiteID = strings.TrimSpace(parsed.Get("siteID").String())
 		scene.SceneID = slugify.Slugify(scene.Site + "-" + scene.SiteID)
-		scene.HomepageURL = parsed.Get("homepageURL").String()
-		scene.Title = parsed.Get("title").String()
+		scene.HomepageURL = strings.TrimSpace(parsed.Get("homepageURL").String())
+		scene.Title = strings.TrimSpace(parsed.Get("title").String())
 		scene.Duration = parsed.Get("duration").Int()
-		scene.Synopsis = parsed.Get("synopsis").String()
-		scene.Covers = append(scene.Covers, parsed.Get("coverURL").String())
+		scene.Synopsis = strings.TrimSpace(parsed.Get("synopsis").String())
+		scene.Covers = append(scene.Covers, strings.TrimSpace(parsed.Get("coverURL").String()))
 		scene.Gallery = interfaceToArray(parsed.Get("galleryURLS").Array())
 		scene.Cast = interfaceToArray(parsed.Get("cast").Array())
 
-		fmt.Printf("%+v", scene)
+		fmt.Printf("\n\nScraped scene: %+v\n\n", scene)
 	})
 
 	siteCollector.OnHTML(scraper.SiteOnhtml.Selector, func(e *colly.HTMLElement) {
@@ -218,21 +208,18 @@ func Scraper() {
 		if scraper.SiteOnhtml.SkipURLContains != nil {
 			for _, s := range scraper.SiteOnhtml.SkipURLContains {
 				if strings.Contains(u, s) {
-					fmt.Println("Skipping: ", u)
 					shouldVisit = false
 					break
 				}
 			}
 		}
 		if shouldVisit {
-			fmt.Println("Found scene, sending to scene scraper...")
 			sceneCollector.Visit(u)
 		}
 	})
 
 	siteCollector.OnHTML(scraper.PaginationOnhtml.Selector, func(e *colly.HTMLElement) {
 		u := e.Request.AbsoluteURL(e.Attr("href"))
-		fmt.Println("Found pagination, sending to site scraper...")
 		siteCollector.Visit(u)
 	})
 

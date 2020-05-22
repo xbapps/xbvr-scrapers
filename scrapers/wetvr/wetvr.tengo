@@ -1,0 +1,15 @@
+fmt := import("fmt")
+text := import("text")
+
+// Remove query params from URL (this can probably be moved into go for all scrapers)
+homepageURL := text.split(url, "?")[0]
+
+// Parse the URL to pull the ID out
+tmp := text.split(homepageURL, "/")
+siteID := tmp[len(tmp)-1]
+
+// Scene duration is a string like "49 minutes". Strip the 49 out of the string and make it an int.
+duration := text.atoi(text.trim_space(text.replace(dateDuration, "minutes", "", -1)))
+
+// Sometimes it's coverSrc and sometimes it's coverSrcAlt
+coverURL := coverSrc || coverSrcAlt

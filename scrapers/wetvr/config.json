@@ -1,4 +1,3 @@
-/* scraper-config
 {
     "scraper_id": "wetvr",
     "site_id": "WetVR",
@@ -25,7 +24,7 @@
         "selector": "div#t2019",
         "needed_vars": [
             {
-                "var_name": "titleText",
+                "var_name": "title",
                 "colly_method": "ChildText",
                 "colly_args": [
                     "h1.t2019-stitle"
@@ -55,7 +54,7 @@
                 ]
             },
             {
-                "var_name": "galleryImgs",
+                "var_name": "galleryURLS",
                 "colly_method": "ChildAttrs",
                 "colly_args": [
                     "div.t2019-thumbs img",
@@ -63,14 +62,14 @@
                 ]
             },
             {
-                "var_name": "synopsisText",
+                "var_name": "synopsis",
                 "colly_method": "ChildText",
                 "colly_args": [
                     "div#t2019-description"
                 ]
             },
             {
-                "var_name": "castText",
+                "var_name": "cast",
                 "colly_method": "ChildTexts",
                 "colly_args": [
                     "div#t2019-models a"
@@ -79,30 +78,3 @@
         ]
     }
 }
-scraper-config */
-
-fmt := import("fmt")
-text := import("text")
-times := import("times")
-
-homepageURL := text.split(url, "?")[0]
-
-tmp := text.split(homepageURL, "/")
-siteID := tmp[len(tmp)-1]
-title := text.trim_space(titleText)
-
-fmt.println(dateDuration)
-
-duration := text.atoi(text.trim_space(text.replace(dateDuration, "minutes", "", -1)))
-
-coverURL := coverSrc || coverSrcAlt
-galleryURLS := galleryImgs
-
-//sc.Synopsis = strings.TrimSpace(e.ChildText(`div#t2019-description`))
-synopsis := text.trim_space(synopsisText)
-
-for i, v in castText {
-    castText[i] = text.trim_space(v)
-}
-
-cast := castText
