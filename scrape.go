@@ -178,6 +178,7 @@ func Scrape(configFile string, parserFile string) {
 				_ = script.Add(v.VarName, arrayToInterface(val))
 			}
 		}
+		_ = script.Add("homepageURL", strings.Split(e.Request.URL.String(), "?")[0]
 		_ = script.Add("url", e.Request.URL.String())
 		// run the script
 		parsed, err := script.RunContext(context.Background())

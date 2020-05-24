@@ -1,9 +1,6 @@
 fmt := import("fmt")
 text := import("text")
 
-// Remove query params from URL (this can probably be moved into go for all scrapers)
-homepageURL := text.split(url, "?")[0]
-
 // Parse the URL to pull the ID out
 tmp := text.split(homepageURL, "/")
 siteID := tmp[len(tmp)-1]
