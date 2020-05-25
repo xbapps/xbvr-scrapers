@@ -1,7 +1,6 @@
 text := import("text")
 funk := import("funk")
 url := import("url")
-fmt := import("fmt")
 
 // Parse the URL to pull the ID out
 tmp := text.split(homepageURL, "/")
