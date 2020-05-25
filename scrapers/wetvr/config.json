@@ -24,17 +24,10 @@
         "selector": "div#t2019",
         "needed_vars": [
             {
-                "var_name": "title",
-                "colly_method": "ChildText",
+                "var_name": "cast",
+                "colly_method": "ChildTexts",
                 "colly_args": [
-                    "h1.t2019-stitle"
-                ]
-            },
-            {
-                "var_name": "dateDuration",
-                "colly_method": "ChildText",
-                "colly_args": [
-                    "div#t2019-stime span"
+                    "div#t2019-models a"
                 ]
             },
             {
@@ -54,6 +47,13 @@
                 ]
             },
             {
+                "var_name": "dateDuration",
+                "colly_method": "ChildText",
+                "colly_args": [
+                    "div#t2019-stime span"
+                ]
+            },
+            {
                 "var_name": "galleryURLS",
                 "colly_method": "ChildAttrs",
                 "colly_args": [
@@ -69,10 +69,10 @@
                 ]
             },
             {
-                "var_name": "cast",
-                "colly_method": "ChildTexts",
+                "var_name": "title",
+                "colly_method": "ChildText",
                 "colly_args": [
-                    "div#t2019-models a"
+                    "h1.t2019-stitle"
                 ]
             }
         ]

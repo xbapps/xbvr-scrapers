@@ -186,7 +186,7 @@ func Scrape(wg *sync.WaitGroup, configFile string, parserFile string, out chan<-
 			}
 		}
 		_ = script.Add("homepageURL", strings.Split(e.Request.URL.String(), "?")[0])
-		_ = script.Add("orig_url", e.Request.URL.String())
+		_ = script.Add("fullHomepageURL", e.Request.URL.String())
 		// run the script
 		parsed, err := script.RunContext(context.Background())
 		if err != nil {
