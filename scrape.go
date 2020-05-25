@@ -10,6 +10,7 @@ import (
 	"os"
 	"path"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/xbapps/xbvr-scrapers/helpers"
@@ -143,7 +144,9 @@ func unCache(URL string, cacheDir string) {
 	}
 }
 
-func Scrape(configFile string, parserFile string) {
+func Scrape(wg *sync.WaitGroup, configFile string, parserFile string, out chan<- ScrapedScene) {
+	defer wg.Done()
+
 	scraperConfig, err := ioutil.ReadFile(configFile)
 	if err != nil {
 		panic(err)
@@ -206,7 +209,7 @@ func Scrape(configFile string, parserFile string) {
 		scene.Cast = interfaceToArray(parsed.Get("cast").Array())
 		scene.Filenames = interfaceToArray(parsed.Get("filenames").Array())
 
-		fmt.Printf("\n\nScraped scene: %+v\n\n", scene)
+		out <- scene
 	})
 
 	siteCollector.OnHTML(scraper.SiteOnhtml.Selector, func(e *colly.HTMLElement) {
