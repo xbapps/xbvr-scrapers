@@ -178,7 +178,7 @@ func Scrape(configFile string, parserFile string) {
 				_ = script.Add(v.VarName, arrayToInterface(val))
 			}
 		}
-		_ = script.Add("homepageURL", strings.Split(e.Request.URL.String(), "?")[0]
+		_ = script.Add("homepageURL", strings.Split(e.Request.URL.String(), "?")[0])
 		_ = script.Add("url", e.Request.URL.String())
 		// run the script
 		parsed, err := script.RunContext(context.Background())
@@ -195,6 +195,7 @@ func Scrape(configFile string, parserFile string) {
 		scene.HomepageURL = strings.TrimSpace(parsed.Get("homepageURL").String())
 		scene.Title = strings.TrimSpace(parsed.Get("title").String())
 		scene.Duration = parsed.Get("duration").Int()
+		scene.Released = strings.TrimSpace(parsed.Get("released").String())
 		scene.Synopsis = strings.TrimSpace(parsed.Get("synopsis").String())
 		scene.Covers = append(scene.Covers, strings.TrimSpace(parsed.Get("coverURL").String()))
 		scene.Gallery = interfaceToArray(parsed.Get("galleryURLS").Array())

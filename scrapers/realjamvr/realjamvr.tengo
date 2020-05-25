@@ -1,0 +1,11 @@
+text := import("text")
+
+// Parse the URL to pull the ID out
+tmp := text.split(homepageURL, "/")
+siteID := text.split(tmp[len(tmp)-1], "-")[0]
+
+// Scene duration is a string like "49:00". Strip the 49 out of the string and make it an int.
+duration = text.atoi(text.split(text.trim_space(duration), ":")[0])
+
+// Release data has a leading comma. Remove it.
+released = text.trim_suffix(text.trim_space(released), ",")

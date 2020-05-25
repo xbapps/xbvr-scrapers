@@ -1,0 +1,86 @@
+{
+    "scraper_id": "realjamvr",
+    "site_id": "RealJam VR",
+    "studio": "Real Jam Network",
+    "site_icon": "https://twivatar.glitch.me/realjamvr",
+    "allowed_domains": [
+        "realjamvr.com"
+    ],
+    "start_url": "https://realjamvr.com/virtualreality/list",
+    "site_onhtml": {
+        "selector": "div.movies-list a:not(.promo__info):not(#pagination a)",
+        "visit_attr": "href",
+        "skip_known": true,
+        "skip_url_contains": [
+            "/join"
+        ]
+    },
+    "pagination_onhtml": {
+        "selector": "#pagination a",
+        "visit_attr": "href",
+        "skip_known": false
+    },
+    "scene_onhtml": {
+        "selector": "html",
+        "needed_vars": [
+            {
+                "var_name": "cast",
+                "colly_method": "ChildTexts",
+                "colly_args": [
+                    ".featuring a"
+                ]
+            },
+            {
+                "var_name": "duration",
+                "colly_method": "ChildText",
+                "colly_args": [
+                    ".duration"
+                ]
+            },
+            {
+                "var_name": "filenameURLS",
+                "colly_method": "ChildAttrs",
+                "colly_args": [
+                    ".downloads a",
+                    "href"
+                ]
+            },
+            {
+                "var_name": "galleryURLS",
+                "colly_method": "ChildAttrs",
+                "colly_args": [
+                    ".scene-previews-container a",
+                    "href"
+                ]
+            },
+            {
+                "var_name": "released",
+                "colly_method": "ChildText",
+                "colly_args": [
+                    ".date"
+                ]
+            },
+            {
+                "var_name": "synopsis",
+                "colly_method": "ChildText",
+                "colly_args": [
+                    "div.desc"
+                ]
+            },
+            {
+                "var_name": "tags",
+                "colly_method": "ChildTexts",
+                "colly_args": [
+                    "div.tags a"
+                ]
+            },
+            {
+                "var_name": "title",
+                "colly_method": "ChildText",
+                "colly_args": [
+                    "h1"
+                ]
+            }
+        ]
+    }
+}
