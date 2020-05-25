@@ -194,20 +194,20 @@ func Scrape(wg *sync.WaitGroup, configFile string, parserFile string, out chan<-
 		}
 
 		// retrieve values
+		scene.Cast = interfaceToArray(parsed.Get("cast").Array())
+		scene.Covers = append(scene.Covers, strings.TrimSpace(parsed.Get("coverURL").String()))
+		scene.Duration = parsed.Get("duration").Int()
+		scene.Filenames = interfaceToArray(parsed.Get("filenames").Array())
+		scene.Gallery = interfaceToArray(parsed.Get("galleryURLS").Array())
+		scene.HomepageURL = strings.TrimSpace(parsed.Get("homepageURL").String())
+		scene.Released = strings.TrimSpace(parsed.Get("released").String())
+		scene.SceneID = slugify.Slugify(scene.Site + "-" + scene.SiteID)
 		scene.SceneType = "VR"
-		scene.Studio = scraper.Studio
 		scene.Site = scraper.SiteID
 		scene.SiteID = strings.TrimSpace(parsed.Get("siteID").String())
-		scene.SceneID = slugify.Slugify(scene.Site + "-" + scene.SiteID)
-		scene.HomepageURL = strings.TrimSpace(parsed.Get("homepageURL").String())
-		scene.Title = strings.TrimSpace(parsed.Get("title").String())
-		scene.Duration = parsed.Get("duration").Int()
-		scene.Released = strings.TrimSpace(parsed.Get("released").String())
+		scene.Studio = scraper.Studio
 		scene.Synopsis = strings.TrimSpace(parsed.Get("synopsis").String())
-		scene.Covers = append(scene.Covers, strings.TrimSpace(parsed.Get("coverURL").String()))
-		scene.Gallery = interfaceToArray(parsed.Get("galleryURLS").Array())
-		scene.Cast = interfaceToArray(parsed.Get("cast").Array())
-		scene.Filenames = interfaceToArray(parsed.Get("filenames").Array())
+		scene.Title = strings.TrimSpace(parsed.Get("title").String())
 
 		out <- scene
 	})
