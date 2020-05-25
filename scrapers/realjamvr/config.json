@@ -31,6 +31,14 @@
                 ]
             },
             {
+                "var_name": "cover",
+                "colly_method": "ChildAttr",
+                "colly_args": [
+                    ".splash-screen",
+                    "style"
+                ]
+            },
+            {
                 "var_name": "duration",
                 "colly_method": "ChildText",
                 "colly_args": [

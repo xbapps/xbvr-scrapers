@@ -1,4 +1,7 @@
 text := import("text")
+funk := import("funk")
+url := import("url")
+fmt := import("fmt")
 
 // Parse the URL to pull the ID out
 tmp := text.split(homepageURL, "/")
@@ -9,3 +12,18 @@ duration = text.atoi(text.split(text.trim_space(duration), ":")[0])
 
 // Release data has a leading comma. Remove it.
 released = text.trim_suffix(text.trim_space(released), ",")
+
+// Cover URL is a CSS style and we need to extract it.
+r := text.re_find(`background(?:-image)?\s*?:\s*?url\s*?\(\s*?(.*?)\s*?\)`, cover)
+coverURL := r[0][1].text
+
+// Filenames are in the query params of the AWS CDN URL and need to be parsed.
+f := []
+for u in filenameURLS {
+    if p := url.get_query_param(u, "response-content-disposition"); p != "" {
+        f = append(f, text.trim(text.split(p, "=")[1], "\""))
+    }
+}
+
+// Some VR headsets use the same files so keep only the unique filenames.
+filenames := funk.uniq_string(f)
