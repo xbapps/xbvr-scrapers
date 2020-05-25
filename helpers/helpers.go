@@ -6,9 +6,17 @@ import (
 	"github.com/d5/tengo/v2"
 )
 
+func wrapError(err error) tengo.Object {
+	if err == nil {
+		return tengo.TrueValue
+	}
+	return &tengo.Error{Value: &tengo.String{Value: err.Error()}}
+}
+
 // HelperModules are scraper helper library modules.
 var HelperModules = map[string]map[string]tengo.Object{
 	"funk": funkModule,
+	"url":  urlModule,
 }
 
 // AllModuleNames returns a list of all helper module names.
