@@ -12,6 +12,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/xbapps/xbvr-scrapers/helpers"
+
 	"github.com/d5/tengo/v2"
 	"github.com/d5/tengo/v2/stdlib"
 	"github.com/gocolly/colly/v2"
@@ -158,7 +160,9 @@ func Scrape(configFile string, parserFile string) {
 		panic(err)
 	}
 	script := tengo.NewScript(scraperParser)
-	script.SetImports(stdlib.GetModuleMap("fmt", "text", "times"))
+	tengoMods := stdlib.GetModuleMap("fmt", "text", "times")
+	tengoMods.AddMap(helpers.GetModuleMap(helpers.AllModuleNames()...))
+	script.SetImports(tengoMods)
 
 	sceneCollector.OnHTML(scraper.SceneOnhtml.Selector, func(e *colly.HTMLElement) {
 		scene := ScrapedScene{}
@@ -205,7 +209,7 @@ func Scrape(configFile string, parserFile string) {
 	})
 
 	siteCollector.OnHTML(scraper.SiteOnhtml.Selector, func(e *colly.HTMLElement) {
-		u := e.Request.AbsoluteURL(e.Attr("href"))
+		u := e.Request.AbsoluteURL(e.Attr(scraper.SiteOnhtml.VisitAttr))
 		shouldVisit := true
 		if scraper.SiteOnhtml.SkipURLContains != nil {
 			for _, s := range scraper.SiteOnhtml.SkipURLContains {
@@ -221,7 +225,7 @@ func Scrape(configFile string, parserFile string) {
 	})
 
 	siteCollector.OnHTML(scraper.PaginationOnhtml.Selector, func(e *colly.HTMLElement) {
-		u := e.Request.AbsoluteURL(e.Attr("href"))
+		u := e.Request.AbsoluteURL(e.Attr(scraper.PaginationOnhtml.VisitAttr))
 		siteCollector.Visit(u)
 	})
 
