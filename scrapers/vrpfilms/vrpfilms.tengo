@@ -1,0 +1,32 @@
+fmt := import("fmt")
+text := import("text")
+
+// No release date anywhere, but we can approximate based on the wordpress date of the
+// cover image. It's at least better than nothing.
+//
+// https://vrpfilms.com/wp-content/uploads/2019/10/No-Boys-Just-Toys-Banner-1600x800.jpg
+t := text.split(coverURL, "/")
+released := fmt.sprintf("%s-%s-01", t[5], t[6])
+
+cast := []
+duration := 0
+tags := []
+
+for i in sceneDetails {
+    // Featuring: Amber Jayne, Selvaggia
+    if text.contains(i, "Featuring:") {
+        tmpCast := text.trim_space(text.split(i, ":")[1])
+        cast = text.split(text.trim_space(tmpCast), ",")
+    }
+
+    // Length: 35 Minutes
+    if text.contains(i, "Length:") {
+        tmpDuration := text.trim_space(text.split(i, ":")[1])
+        duration = text.atoi(text.split(tmpDuration, " ")[0])
+    }
+
+    if text.contains(i, "Tags:") {
+        tmpTags := text.split(i, ":")[1]
+        tags = text.split(text.trim_space(tmpTags), ",")
+    }
+}

@@ -198,7 +198,7 @@ func Scrape(wg *sync.WaitGroup, configFile string, parserFile string, out chan<-
 		scene.SiteID = strings.TrimSpace(parsed.Get("siteID").String())
 		scene.Studio = scraper.Studio
 
-		// retrieve values from script 
+		// retrieve values from script
 		scene.Cast = interfaceToArray(parsed.Get("cast").Array())
 		scene.Covers = append(scene.Covers, strings.TrimSpace(parsed.Get("coverURL").String()))
 		scene.Duration = parsed.Get("duration").Int()
@@ -208,6 +208,7 @@ func Scrape(wg *sync.WaitGroup, configFile string, parserFile string, out chan<-
 		scene.Released = strings.TrimSpace(parsed.Get("released").String())
 		scene.SceneID = slugify.Slugify(scene.Site + "-" + scene.SiteID)
 		scene.Synopsis = strings.TrimSpace(parsed.Get("synopsis").String())
+		scene.Tags = interfaceToArray(parsed.Get("tags").Array())
 		scene.Title = strings.TrimSpace(parsed.Get("title").String())
 
 		out <- scene

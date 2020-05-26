@@ -1,0 +1,74 @@
+{
+    "scraper_id": "vrpfilms",
+    "site_id": "VRP Films",
+    "studio": "VRP Films",
+    "site_icon": "https://vrpfilms.com/wp-content/uploads/fbrfg/apple-touch-icon.png",
+    "allowed_domains": [
+        "vrpfilms.com",
+        "www.vrpfilms.com"
+    ],
+    "start_url": "https://vrpfilms.com/vrp-movies",
+    "site_onhtml": {
+        "selector": "article a",
+        "visit_attr": "href",
+        "skip_known": true,
+        "skip_url_contains": [
+            "/join"
+        ]
+    },
+    "pagination_onhtml": {
+        "selector": "a.page-numbers",
+        "visit_attr": "href",
+        "skip_known": false
+    },
+    "scene_onhtml": {
+        "selector": "html",
+        "needed_vars": [
+            {
+                "var_name": "coverURL",
+                "colly_method": "ChildAttr",
+                "colly_args": [
+                    "meta[property=\"og:image\"]",
+                    "content"
+                ]
+            },
+            {
+                "var_name": "durationText",
+                "colly_method": "ChildText",
+                "colly_args": [
+                    ".info .subtext"
+                ]
+            },
+            {
+                "var_name": "galleryURLS",
+                "colly_method": "ChildAttrs",
+                "colly_args": [
+                    "movies-gallery a",
+                    "href"
+                ]
+            },
+            {
+                "var_name": "sceneDetails",
+                "colly_method": "ChildTexts",
+                "colly_args": [
+                    ".detail p"
+                ]
+            },
+            {
+                "var_name": "siteID",
+                "colly_method": "ChildAttr",
+                "colly_args": [
+                    "a.member-download",
+                    "data-main-product-id"
+                ]
+            },
+            {
+                "var_name": "title",
+                "colly_method": "ChildText",
+                "colly_args": [
+                    "span.breadcrumb_last"
+                ]
+            }
+        ]
+    }
+}
