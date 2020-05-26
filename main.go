@@ -1,10 +1,12 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"io/ioutil"
 	"log"
 	"os"
+	"path"
 	"path/filepath"
 	"sync"
 	"sync/atomic"
@@ -23,7 +25,35 @@ func sceneWriter(wg *sync.WaitGroup, i *uint64, scenes <-chan scrapers.ScrapedSc
 	}
 }
 
+func scrapeDir(dir string, scraperWG *sync.WaitGroup, collectedScenes chan scrapers.ScrapedScene) {
+	sfs, err := ioutil.ReadDir(dir)
+	if err != nil {
+		log.Fatal(err)
+	}
+	var scraperFiles []string
+	for _, sf := range sfs {
+		scraperFiles = append(scraperFiles, sf.Name())
+	}
+	fmt.Println(scraperFiles)
+
+	_, scraperName := path.Split(dir)
+	if funk.Contains(scraperFiles, "config.json") && funk.Contains(scraperFiles, scraperName+".tengo") {
+		configFile := filepath.Join(dir, "config.json")
+		parserFile := filepath.Join(dir, scraperName+".tengo")
+		fmt.Printf("Scraping %s...\n", dir)
+		fmt.Println(configFile, parserFile)
+
+		scraperWG.Add(1)
+		go scrapers.Scrape(scraperWG, configFile, parserFile, collectedScenes)
+	} else {
+		fmt.Printf("%s missing required files. Skipping.\n", dir)
+	}
+}
+
 func main() {
+	var scraper = flag.String("scraper", "", "process a single specified scraper")
+	flag.Parse()
+
 	scrapersDir := "scrapers"
 	files, err := ioutil.ReadDir(scrapersDir)
 	if err != nil {
@@ -38,33 +68,21 @@ func main() {
 	writerWG.Add(1)
 	go sceneWriter(&writerWG, &sceneCount, collectedScenes)
 
-	for _, f := range files {
-		scraperDir := filepath.Join(scrapersDir, f.Name())
+	if *scraper != "" {
+		scraperDir := filepath.Join(scrapersDir, *scraper)
+		scrapeDir(scraperDir, &scraperWG, collectedScenes)
+	} else {
+		for _, f := range files {
+			scraperDir := filepath.Join(scrapersDir, f.Name())
 
-		if info, err := os.Stat(scraperDir); err == nil && !info.IsDir() {
-			continue
-		}
+			if info, err := os.Stat(scraperDir); err == nil && !info.IsDir() {
+				continue
+			}
 
-		sfs, err := ioutil.ReadDir(scraperDir)
-		if err != nil {
-			log.Fatal(err)
-		}
-		var scraperFiles []string
-		for _, sf := range sfs {
-			scraperFiles = append(scraperFiles, sf.Name())
-		}
-
-		if funk.Contains(scraperFiles, "config.json") && funk.Contains(scraperFiles, f.Name()+".tengo") {
-			configFile := filepath.Join(scraperDir, "config.json")
-			parserFile := filepath.Join(scraperDir, f.Name()+".tengo")
-			fmt.Printf("Scraping %s...", f.Name())
-
-			scraperWG.Add(1)
-			go scrapers.Scrape(&scraperWG, configFile, parserFile, collectedScenes)
-		} else {
-			fmt.Printf("%s missing required files. Skipping.", scraperDir)
+			scrapeDir(scraperDir, &scraperWG, collectedScenes)
 		}
 	}
+
 	// Wait for scrapers to complete
 	scraperWG.Wait()
 
