@@ -1,0 +1,26 @@
+fmt := import("fmt")
+text := import("text")
+
+// Sometimes it's coverSrc and sometimes it's coverSrcAlt
+// coverSrc has a leading / too so remove it
+coverURL := text.trim_prefix(coverSrc, "/") || coverSrcAlt
+
+// Scene ID - get from cover image URL
+r := text.re_find(`(?m)vrporn(\d+)`, coverURL)
+siteID := r[0][1].text
+
+// e.ForEach(`.info .subtext`, func(id int, e *colly.HTMLElement) {
+// 			tmp := strings.Split(e.Text, "Runtime: ")
+// 			if len(tmp) > 1 {
+// 				tmpDuration, err := strconv.Atoi(strings.Split(tmp[1], ":")[0])
+// 				if err == nil {
+// 					sc.Duration = tmpDuration
+// 				}
+// 			}
+// 		})
+tmpDuration := text.split(durationText, "Runtime: ")
+duration := 0
+if len(tmpDuration) > 1 {
+    duration = text.atoi(text.trim_space(text.split(tmpDuration[1], ":")[0]))
+    fmt.println("Duration: ", duration)
+}

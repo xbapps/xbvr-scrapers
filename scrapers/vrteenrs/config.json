@@ -1,0 +1,68 @@
+{
+    "scraper_id": "vrteenrs",
+    "site_id": "VRTeenrs",
+    "studio": "International Media Company BV",
+    "site_icon": "https://mcdn.vrporn.com/files/20170702081351/vrteenrs-icon-vr-porn-studio-vrporn.com-virtual-reality.png",
+    "allowed_domains": [
+        "vrteenrs.com",
+        "www.vrteenrs.com"
+    ],
+    "start_url": "https://www.vrteenrs.com/vrporn.php",
+    "scene_onhtml": {
+        "selector": ".list_item",
+        "needed_vars": [
+            {
+                "var_name": "cast",
+                "colly_method": "ChildTexts",
+                "colly_args": [
+                    ".featuring a"
+                ]
+            },
+            {
+                "var_name": "coverSrc",
+                "colly_method": "ChildAttr",
+                "colly_args": [
+                    "video",
+                    "poster"
+                ]
+            },
+            {
+                "var_name": "coverSrcAlt",
+                "colly_method": "ChildAttr",
+                "colly_args": [
+                    ".thumb img",
+                    "src"
+                ]
+            },
+            {
+                "var_name": "durationText",
+                "colly_method": "ChildText",
+                "colly_args": [
+                    ".info .subtext"
+                ]
+            },
+            {
+                "var_name": "filenameURLS",
+                "colly_method": "ChildAttrs",
+                "colly_args": [
+                    ".downloads a",
+                    "href"
+                ]
+            },
+            {
+                "var_name": "synopsis",
+                "colly_method": "ChildText",
+                "colly_args": [
+                    ".info .description"
+                ]
+            },
+            {
+                "var_name": "title",
+                "colly_method": "ChildText",
+                "colly_args": [
+                    ".title"
+                ]
+            }
+        ]
+    }
+}

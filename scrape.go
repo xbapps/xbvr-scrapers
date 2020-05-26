@@ -193,7 +193,12 @@ func Scrape(wg *sync.WaitGroup, configFile string, parserFile string, out chan<-
 			panic(err)
 		}
 
-		// retrieve values
+		scene.SceneType = "VR"
+		scene.Site = scraper.SiteID
+		scene.SiteID = strings.TrimSpace(parsed.Get("siteID").String())
+		scene.Studio = scraper.Studio
+
+		// retrieve values from script 
 		scene.Cast = interfaceToArray(parsed.Get("cast").Array())
 		scene.Covers = append(scene.Covers, strings.TrimSpace(parsed.Get("coverURL").String()))
 		scene.Duration = parsed.Get("duration").Int()
@@ -202,10 +207,6 @@ func Scrape(wg *sync.WaitGroup, configFile string, parserFile string, out chan<-
 		scene.HomepageURL = strings.TrimSpace(parsed.Get("homepageURL").String())
 		scene.Released = strings.TrimSpace(parsed.Get("released").String())
 		scene.SceneID = slugify.Slugify(scene.Site + "-" + scene.SiteID)
-		scene.SceneType = "VR"
-		scene.Site = scraper.SiteID
-		scene.SiteID = strings.TrimSpace(parsed.Get("siteID").String())
-		scene.Studio = scraper.Studio
 		scene.Synopsis = strings.TrimSpace(parsed.Get("synopsis").String())
 		scene.Title = strings.TrimSpace(parsed.Get("title").String())
 
@@ -233,5 +234,11 @@ func Scrape(wg *sync.WaitGroup, configFile string, parserFile string, out chan<-
 		siteCollector.Visit(u)
 	})
 
-	siteCollector.Visit(scraper.StartURL)
+	// If a site only has scenes, site_onhtml can be omitted and we'll start
+	// with the sceneCollector instead
+	if scraper.SiteOnhtml.Selector != "" {
+		siteCollector.Visit(scraper.StartURL)
+	} else {
+		sceneCollector.Visit(scraper.StartURL)
+	}
 }
