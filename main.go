@@ -10,9 +10,10 @@ import (
 	"time"
 
 	"github.com/thoas/go-funk"
+	"github.com/xbapps/xbvr-scrapers/scrapers"
 )
 
-func sceneWriter(wg *sync.WaitGroup, i *uint64, scenes <-chan ScrapedScene) {
+func sceneWriter(wg *sync.WaitGroup, i *uint64, scenes <-chan scrapers.ScrapedScene) {
 	defer wg.Done()
 
 	for scene := range scenes {
@@ -30,7 +31,7 @@ func main() {
 	t0 := time.Now()
 
 	var scraperWG, writerWG sync.WaitGroup
-	collectedScenes := make(chan ScrapedScene, 250)
+	collectedScenes := make(chan scrapers.ScrapedScene, 250)
 	var sceneCount uint64
 
 	writerWG.Add(1)
@@ -54,7 +55,7 @@ func main() {
 			fmt.Printf("Scraping %s...", f.Name())
 
 			scraperWG.Add(1)
-			go Scrape(&scraperWG, configFile, parserFile, collectedScenes)
+			go scrapers.Scrape(&scraperWG, configFile, parserFile, collectedScenes)
 		} else {
 			fmt.Printf("%s missing required files. Skipping.", scraperDir)
 		}
