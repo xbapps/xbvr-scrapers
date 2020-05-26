@@ -9,15 +9,7 @@ coverURL := text.trim_prefix(coverSrc, "/") || coverSrcAlt
 r := text.re_find(`(?m)vrporn(\d+)`, coverURL)
 siteID := r[0][1].text
 
-// e.ForEach(`.info .subtext`, func(id int, e *colly.HTMLElement) {
-// 			tmp := strings.Split(e.Text, "Runtime: ")
-// 			if len(tmp) > 1 {
-// 				tmpDuration, err := strconv.Atoi(strings.Split(tmp[1], ":")[0])
-// 				if err == nil {
-// 					sc.Duration = tmpDuration
-// 				}
-// 			}
-// 		})
+// Parse duration
 tmpDuration := text.split(durationText, "Runtime: ")
 duration := 0
 if len(tmpDuration) > 1 {
