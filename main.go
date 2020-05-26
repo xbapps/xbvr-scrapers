@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
+	"os"
 	"path/filepath"
 	"sync"
 	"sync/atomic"
@@ -39,6 +40,10 @@ func main() {
 
 	for _, f := range files {
 		scraperDir := filepath.Join(scrapersDir, f.Name())
+
+		if info, err := os.Stat(scraperDir); err == nil && !info.IsDir() {
+			continue
+		}
 
 		sfs, err := ioutil.ReadDir(scraperDir)
 		if err != nil {
