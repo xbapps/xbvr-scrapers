@@ -2,10 +2,10 @@ package main
 
 import (
 	"encoding/json"
-	"flag"
 	"fmt"
 	"io/ioutil"
 	"log"
+	"os"
 	"regexp"
 	"strings"
 
@@ -13,10 +13,7 @@ import (
 )
 
 func main() {
-	var scraper = flag.String("scraper", "", "path to scraper code")
-	flag.Parse()
-
-	scraperCode, err := ioutil.ReadFile(*scraper)
+	scraperCode, err := ioutil.ReadFile(os.Args[1])
 	if err != nil {
 		panic(err)
 	}
