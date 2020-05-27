@@ -1,0 +1,20 @@
+text := import("text")
+times := import("times")
+fmt := import("fmt")
+
+// Preview image comes in two flavors - preview_vr.jpg and preview.jpg		
+coverURL := []
+for i, v in covers {
+    coverURL = append(coverURL, text.replace(v, "_vr", "", -1))
+}
+
+// For older videos
+if len(covers) == 0 {
+    for v in coversOld {
+        coverURL = append(coverURL, text.replace(v, "_vr", "", -1))
+    }
+}
+
+// Date
+tmpReleased := times.parse("January 2, 2006", releasedText)
+released := times.time_format(tmpReleased, "2006-01-02")

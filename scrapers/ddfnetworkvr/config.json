@@ -1,0 +1,94 @@
+{
+    "scraper_id": "ddfnetworkvr",
+    "site_id": "DDFNetworkVR",
+    "studio": "DDFNetwork",
+    "site_icon": "https://twivatar.glitch.me/ddfnetwork",
+    "allowed_domains": [
+        "ddfnetworkvr.com"
+    ],
+    "start_url": "https://ddfnetworkvr.com/",
+    "site_onhtml": {
+        "selector": "div#scenesAjaxReplace a.play-on-hover",
+        "visit_attr": "href",
+        "skip_known": true,
+        "skip_url_contains": [
+            "/join"
+        ]
+    },
+    "pagination_onhtml": {
+        "selector": "ul.pagination a.page-link",
+        "visit_attr": "href",
+        "skip_known": false
+    },
+    "scene_onhtml": {
+        "selector": "html",
+        "needed_vars": [
+            {
+                "var_name": "cast",
+                "colly_method": "ChildTexts",
+                "colly_args": [
+                    "div.video-title h2.actors a"
+                ]
+            },
+            {
+                "var_name": "covers",
+                "colly_method": "ChildAttrs",
+                "colly_args": [
+                    "dl8-video",
+                    "poster"
+                ]
+            },
+            {
+                "var_name": "coversOld",
+                "colly_method": "ChildAttr",
+                "colly_args": [
+                    "div.video-box-inner img",
+                    "src"
+                ]
+            },
+            {
+                "var_name": "durationText",
+                "colly_method": "ChildText",
+                "colly_args": [
+                    "p.duration"
+                ]
+            },
+            {
+                "var_name": "galleryURLS",
+                "colly_method": "ChildAttrs",
+                "colly_args": [
+                    "#photoSliderGuest div.card a",
+                    "href"
+                ]
+            },
+            {
+                "var_name": "releasedText",
+                "colly_method": "ChildText",
+                "colly_args": [
+                    "h2.actors time"
+                ]
+            },
+            {
+                "var_name": "synopsis",
+                "colly_method": "ChildText",
+                "colly_args": [
+                    "div.about-text p.box-container"
+                ]
+            },
+            {
+                "var_name": "tags",
+                "colly_method": "ChildTexts",
+                "colly_args": [
+                    "ul.tags li"
+                ]
+            },
+            {
+                "var_name": "title",
+                "colly_method": "ChildText",
+                "colly_args": [
+                    "div.video-title h1"
+                ]
+            }
+        ]
+    }
+}

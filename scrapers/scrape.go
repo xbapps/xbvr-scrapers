@@ -200,7 +200,13 @@ func Scrape(wg *sync.WaitGroup, configFile string, parserFile string, out chan<-
 
 		// retrieve values from script
 		scene.Cast = interfaceToArray(parsed.Get("cast").Array())
-		scene.Covers = append(scene.Covers, strings.TrimSpace(parsed.Get("coverURL").String()))
+		covers := parsed.Get("coverURL")
+		if covers.ValueType() == "string" {
+			scene.Covers = append(scene.Covers, strings.TrimSpace(covers.String()))
+		} else {
+			scene.Covers = interfaceToArray(covers.Array())
+			fmt.Println(covers.Array())
+		}
 		scene.Duration = parsed.Get("duration").Int()
 		scene.Filenames = interfaceToArray(parsed.Get("filenames").Array())
 		scene.Gallery = interfaceToArray(parsed.Get("galleryURLS").Array())
