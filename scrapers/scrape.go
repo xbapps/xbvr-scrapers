@@ -9,6 +9,7 @@ import (
 	"io/ioutil"
 	"os"
 	"path"
+	"path/filepath"
 	"strings"
 	"sync"
 	"time"
@@ -22,6 +23,12 @@ import (
 )
 
 var userAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/73.0.3683.103 Safari/537.36"
+
+type NeededVars struct {
+	VarName     string   `json:"var_name"`
+	CollyMethod string   `json:"colly_method"`
+	CollyArgs   []string `json:"colly_args"`
+}
 
 type ScraperDefinition struct {
 	ScraperID      string   `json:"scraper_id"`
@@ -42,13 +49,15 @@ type ScraperDefinition struct {
 		SkipKnown bool   `json:"skip_known"`
 	} `json:"pagination_onhtml"`
 	SceneOnhtml struct {
-		Selector   string `json:"selector"`
-		NeededVars []struct {
-			VarName     string   `json:"var_name"`
-			CollyMethod string   `json:"colly_method"`
-			CollyArgs   []string `json:"colly_args"`
-		} `json:"needed_vars"`
+		Selector        string       `json:"selector"`
+		TransferToExtra bool         `json:"transfer_to_extra"`
+		NeededVars      []NeededVars `json:"needed_vars"`
 	} `json:"scene_onhtml"`
+	ExtraOnhtml struct {
+		Selector   string       `json:"selector"`
+		Parser     string       `json:"parser"`
+		NeededVars []NeededVars `json:"needed_vars"`
+	} `json:"extra_onhtml,omitempty"`
 }
 
 type ScrapedScene struct {
@@ -144,6 +153,39 @@ func unCache(URL string, cacheDir string) {
 	}
 }
 
+func getScript(s string) *tengo.Script {
+	scriptContents, err := ioutil.ReadFile(s)
+	if err != nil {
+		panic(err)
+	}
+	script := tengo.NewScript(scriptContents)
+	tengoMods := stdlib.GetModuleMap("fmt", "text", "times")
+	tengoMods.AddMap(helpers.GetModuleMap(helpers.AllModuleNames()...))
+	script.SetImports(tengoMods)
+	return script
+}
+
+func processVars(nv []NeededVars, e *colly.HTMLElement, script *tengo.Script) {
+	for _, v := range nv {
+		switch v.CollyMethod {
+		case "ChildText":
+			val := e.ChildText(v.CollyArgs[0])
+			_ = script.Add(v.VarName, val)
+		case "ChildTexts":
+			val := e.ChildTexts(v.CollyArgs[0])
+			_ = script.Add(v.VarName, arrayToInterface(val))
+		case "ChildAttr":
+			val := e.ChildAttr(v.CollyArgs[0], v.CollyArgs[1])
+			_ = script.Add(v.VarName, val)
+		case "ChildAttrs":
+			val := e.ChildAttrs(v.CollyArgs[0], v.CollyArgs[1])
+			_ = script.Add(v.VarName, arrayToInterface(val))
+		}
+	}
+	_ = script.Add("homepageURL", strings.Split(e.Request.URL.String(), "?")[0])
+	_ = script.Add("fullHomepageURL", e.Request.URL.String())
+}
+
 func Scrape(wg *sync.WaitGroup, configFile string, parserFile string, out chan<- ScrapedScene) {
 	defer wg.Done()
 
@@ -158,37 +200,16 @@ func Scrape(wg *sync.WaitGroup, configFile string, parserFile string, out chan<-
 	sceneCollector := createCollector(scraper.AllowedDomains...)
 	siteCollector := createCollector(scraper.AllowedDomains...)
 
-	scraperParser, err := ioutil.ReadFile(parserFile)
-	if err != nil {
-		panic(err)
-	}
-	script := tengo.NewScript(scraperParser)
-	tengoMods := stdlib.GetModuleMap("fmt", "text", "times")
-	tengoMods.AddMap(helpers.GetModuleMap(helpers.AllModuleNames()...))
-	script.SetImports(tengoMods)
+	extraCollector := cloneCollector(sceneCollector)
+
+	sceneScript := getScript(parserFile)
 
 	sceneCollector.OnHTML(scraper.SceneOnhtml.Selector, func(e *colly.HTMLElement) {
 		scene := ScrapedScene{}
-		for _, v := range scraper.SceneOnhtml.NeededVars {
-			switch v.CollyMethod {
-			case "ChildText":
-				val := e.ChildText(v.CollyArgs[0])
-				_ = script.Add(v.VarName, val)
-			case "ChildTexts":
-				val := e.ChildTexts(v.CollyArgs[0])
-				_ = script.Add(v.VarName, arrayToInterface(val))
-			case "ChildAttr":
-				val := e.ChildAttr(v.CollyArgs[0], v.CollyArgs[1])
-				_ = script.Add(v.VarName, val)
-			case "ChildAttrs":
-				val := e.ChildAttrs(v.CollyArgs[0], v.CollyArgs[1])
-				_ = script.Add(v.VarName, arrayToInterface(val))
-			}
-		}
-		_ = script.Add("homepageURL", strings.Split(e.Request.URL.String(), "?")[0])
-		_ = script.Add("fullHomepageURL", e.Request.URL.String())
+		processVars(scraper.SceneOnhtml.NeededVars, e, sceneScript)
+
 		// run the script
-		parsed, err := script.RunContext(context.Background())
+		parsed, err := sceneScript.RunContext(context.Background())
 		if err != nil {
 			panic(err)
 		}
@@ -217,7 +238,15 @@ func Scrape(wg *sync.WaitGroup, configFile string, parserFile string, out chan<-
 		scene.Tags = interfaceToArray(parsed.Get("tags").Array())
 		scene.Title = strings.TrimSpace(parsed.Get("title").String())
 
-		out <- scene
+		if scraper.SceneOnhtml.TransferToExtra {
+			ctx := colly.NewContext()
+			ctx.Put("scene", scene)
+
+			extraURL := parsed.Get("extraURL").String()
+			extraCollector.Request("GET", extraURL, nil, ctx, nil)
+		} else {
+			out <- scene
+		}
 	})
 
 	siteCollector.OnHTML(scraper.SiteOnhtml.Selector, func(e *colly.HTMLElement) {
@@ -240,6 +269,30 @@ func Scrape(wg *sync.WaitGroup, configFile string, parserFile string, out chan<-
 		u := e.Request.AbsoluteURL(e.Attr(scraper.PaginationOnhtml.VisitAttr))
 		siteCollector.Visit(u)
 	})
+
+	if scraper.ExtraOnhtml.Selector != "" {
+		var extraScript *tengo.Script
+		if scraper.ExtraOnhtml.Parser != "" {
+			extraScript = getScript(filepath.Join(filepath.Dir(parserFile), scraper.ExtraOnhtml.Parser))
+		}
+		extraCollector.OnHTML(scraper.ExtraOnhtml.Selector, func(e *colly.HTMLElement) {
+			processVars(scraper.ExtraOnhtml.NeededVars, e, extraScript)
+
+			// run the script
+			parsed, err := extraScript.RunContext(context.Background())
+			if err != nil {
+				panic(err)
+			}
+
+			scene := e.Request.Ctx.GetAny("scene").(ScrapedScene)
+
+			if len(scene.Filenames) == 0 {
+				scene.Filenames = interfaceToArray(parsed.Get("filenames").Array())
+			}
+
+			out <- scene
+		})
+	}
 
 	// If a site only has scenes, site_onhtml can be omitted and we'll start
 	// with the sceneCollector instead

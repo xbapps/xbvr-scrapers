@@ -1,0 +1,102 @@
+{
+    "scraper_id": "badoinkvr",
+    "site_id": "BadoinkVR",
+    "studio": "Badoink",
+    "site_icon": "https://twivatar.glitch.me/badoinkofficial",
+    "allowed_domains": [
+        "badoinkvr.com"
+    ],
+    "start_url": "https://badoinkvr.com/vrpornvideos",
+    "site_onhtml": {
+        "selector": "main[data-page=VideoList] a.video-card-image-container",
+        "visit_attr": "href",
+        "skip_known": true,
+        "skip_url_contains": [
+            "/join"
+        ]
+    },
+    "pagination_onhtml": {
+        "selector": "div.pagination a",
+        "visit_attr": "href",
+        "skip_known": false
+    },
+    "scene_onhtml": {
+        "selector": "html",
+        "transfer_to_extra": true,
+        "needed_vars": [
+            {
+                "var_name": "cast",
+                "colly_method": "ChildTexts",
+                "colly_args": [
+                    "a.video-actor-link"
+                ]
+            },
+            {
+                "var_name": "coverURL",
+                "colly_method": "ChildAttr",
+                "colly_args": [
+                    "div#videoPreviewContainer picture img",
+                    "src"
+                ]
+            },
+            {
+                "var_name": "durationText",
+                "colly_method": "ChildAttr",
+                "colly_args": [
+                    "p.video-duration",
+                    "content"
+                ]
+            },
+            {
+                "var_name": "galleryURLS",
+                "colly_method": "ChildAttrs",
+                "colly_args": [
+                    "div#gallery div.gallery-item",
+                    "data-big-image"
+                ]
+            },
+            {
+                "var_name": "releasedText",
+                "colly_method": "ChildText",
+                "colly_args": [
+                    "p.video-upload-date"
+                ]
+            },
+            {
+                "var_name": "synopsis",
+                "colly_method": "ChildText",
+                "colly_args": [
+                    "p.video-description"
+                ]
+            },
+            {
+                "var_name": "tags",
+                "colly_method": "ChildTexts",
+                "colly_args": [
+                    "a.video-tag"
+                ]
+            },
+            {
+                "var_name": "title",
+                "colly_method": "ChildText",
+                "colly_args": [
+                    "h1.video-title"
+                ]
+            }
+        ]
+    },
+    "extra_onhtml": {
+        "selector": "html",
+        "parser": "trailers.tengo",
+        "needed_vars": [
+            {
+                "var_name": "filenamesText",
+                "colly_method": "ChildAttrs",
+                "colly_args": [
+                    "dl8-video source",
+                    "src"
+                ]
+            }
+        ]
+    }
+}
