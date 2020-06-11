@@ -6,7 +6,6 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
-	"path"
 	"path/filepath"
 	"sync"
 	"sync/atomic"
@@ -36,7 +35,7 @@ func scrapeDir(dir string, scraperWG *sync.WaitGroup, collectedScenes chan scrap
 	}
 	fmt.Println(scraperFiles)
 
-	_, scraperName := path.Split(dir)
+	_, scraperName := filepath.Split(dir)
 	if funk.Contains(scraperFiles, "config.json") && funk.Contains(scraperFiles, scraperName+".tengo") {
 		configFile := filepath.Join(dir, "config.json")
 		parserFile := filepath.Join(dir, scraperName+".tengo")

@@ -8,7 +8,6 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
-	"path"
 	"path/filepath"
 	"strings"
 	"sync"
@@ -146,8 +145,8 @@ func createCallbacks(c *colly.Collector) *colly.Collector {
 func unCache(URL string, cacheDir string) {
 	sum := sha1.Sum([]byte(URL))
 	hash := hex.EncodeToString(sum[:])
-	dir := path.Join(cacheDir, hash[:2])
-	filename := path.Join(dir, hash)
+	dir := filepath.Join(cacheDir, hash[:2])
+	filename := filepath.Join(dir, hash)
 	if err := os.Remove(filename); err != nil {
 		fmt.Println(err)
 	}
