@@ -6,7 +6,7 @@ require (
 	github.com/PuerkitoBio/goquery v1.5.1 // indirect
 	github.com/antchfx/htmlquery v1.2.3 // indirect
 	github.com/antchfx/xmlquery v1.2.4 // indirect
-	github.com/d5/tengo/v2 v2.3.2
+	github.com/d5/tengo/v2 v2.6.0
 	github.com/gobwas/glob v0.2.3 // indirect
 	github.com/gocolly/colly/v2 v2.1.0
 	github.com/kennygrant/sanitize v1.2.4 // indirect
