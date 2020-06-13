@@ -8,8 +8,10 @@ siteID := text.replace(tmp[len(tmp)-1], "/", "", -1)
 coverURL = text.split(coverURL, "?")[0]
 
 // Date
-tmpReleased := times.parse("January 2, 2006", text.replace(releasedText, "Uploaded: ", "", -1))
-released := times.time_format(tmpReleased, "2006-01-02")
+if releasedText {
+    tmpReleased := times.parse("January 2, 2006", text.replace(releasedText, "Uploaded: ", "", -1))
+    released := times.time_format(tmpReleased, "2006-01-02")
+}
 
 //Duration
 duration := text.atoi(text.replace(text.split(durationText, "M")[0], "PT", "", -1))

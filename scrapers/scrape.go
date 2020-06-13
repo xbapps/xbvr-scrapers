@@ -36,6 +36,7 @@ type ScraperDefinition struct {
 	SiteIcon       string   `json:"site_icon"`
 	AllowedDomains []string `json:"allowed_domains"`
 	StartURL       string   `json:"start_url"`
+	CopyFrom       string   `json:"copy_from"`
 	SiteOnhtml     struct {
 		Selector        string   `json:"selector"`
 		VisitAttr       string   `json:"visit_attr"`
@@ -49,6 +50,7 @@ type ScraperDefinition struct {
 	} `json:"pagination_onhtml"`
 	SceneOnhtml struct {
 		Selector        string       `json:"selector"`
+		Parser          string       `json:"parser"`
 		TransferToExtra bool         `json:"transfer_to_extra"`
 		NeededVars      []NeededVars `json:"needed_vars"`
 	} `json:"scene_onhtml"`
@@ -164,6 +166,17 @@ func getScript(s string) *tengo.Script {
 	return script
 }
 
+func parseConfig(configFile string) ScraperDefinition {
+	scraperConfig, err := ioutil.ReadFile(configFile)
+	if err != nil {
+		panic(err)
+	}
+
+	var scraper ScraperDefinition
+	json.Unmarshal(scraperConfig, &scraper)
+	return scraper
+}
+
 func processVars(nv []NeededVars, e *colly.HTMLElement, script *tengo.Script) {
 	for _, v := range nv {
 		switch v.CollyMethod {
@@ -185,23 +198,32 @@ func processVars(nv []NeededVars, e *colly.HTMLElement, script *tengo.Script) {
 	_ = script.Add("fullHomepageURL", e.Request.URL.String())
 }
 
-func Scrape(wg *sync.WaitGroup, configFile string, parserFile string, out chan<- ScrapedScene) {
+func Scrape(wg *sync.WaitGroup, configPath string, out chan<- ScrapedScene) {
 	defer wg.Done()
 
-	scraperConfig, err := ioutil.ReadFile(configFile)
-	if err != nil {
-		panic(err)
-	}
+	configFile := filepath.Join(configPath, "config.json")
 
-	var scraper ScraperDefinition
-	json.Unmarshal(scraperConfig, &scraper)
+	scraper := parseConfig(configFile)
 
 	sceneCollector := createCollector(scraper.AllowedDomains...)
 	siteCollector := createCollector(scraper.AllowedDomains...)
 
 	extraCollector := cloneCollector(sceneCollector)
 
-	sceneScript := getScript(parserFile)
+	if scraper.CopyFrom != "" {
+		baseDir := filepath.Dir(configPath)
+		configPath = filepath.Join(baseDir, scraper.CopyFrom)
+		parentConfigFile := filepath.Join(configPath, "config.json")
+		parentConfig := parseConfig(parentConfigFile)
+
+		scraper.SiteOnhtml = parentConfig.SiteOnhtml
+		scraper.PaginationOnhtml = parentConfig.PaginationOnhtml
+		scraper.SceneOnhtml = parentConfig.SceneOnhtml
+		scraper.ExtraOnhtml = parentConfig.ExtraOnhtml
+	}
+
+	sceneScriptFile := filepath.Join(configPath, scraper.SceneOnhtml.Parser)
+	sceneScript := getScript(sceneScriptFile)
 
 	sceneCollector.OnHTML(scraper.SceneOnhtml.Selector, func(e *colly.HTMLElement) {
 		scene := ScrapedScene{}
@@ -272,7 +294,7 @@ func Scrape(wg *sync.WaitGroup, configFile string, parserFile string, out chan<-
 	if scraper.ExtraOnhtml.Selector != "" {
 		var extraScript *tengo.Script
 		if scraper.ExtraOnhtml.Parser != "" {
-			extraScript = getScript(filepath.Join(filepath.Dir(parserFile), scraper.ExtraOnhtml.Parser))
+			extraScript = getScript(filepath.Join(configPath, scraper.ExtraOnhtml.Parser))
 		}
 		extraCollector.OnHTML(scraper.ExtraOnhtml.Selector, func(e *colly.HTMLElement) {
 			processVars(scraper.ExtraOnhtml.NeededVars, e, extraScript)

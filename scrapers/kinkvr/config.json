@@ -1,0 +1,11 @@
+{
+    "scraper_id": "kinkvr",
+    "site_id": "KinkVR",
+    "studio": "Badoink",
+    "site_icon": "https://kinkvr.com/kinkvr_icons/apple-touch-icon.png",
+    "allowed_domains": [
+        "kinkvr.com"
+    ],
+    "start_url": "https://kinkvr.com/bdsm-vr-videos",
+    "copy_from": "badoinkvr"
+}

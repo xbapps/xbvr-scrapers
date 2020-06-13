@@ -23,6 +23,7 @@
     },
     "scene_onhtml": {
         "selector": "html",
+        "parser": "vrpfilms.tengo",
         "needed_vars": [
             {
                 "var_name": "coverURL",

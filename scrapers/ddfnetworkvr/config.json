@@ -22,6 +22,7 @@
     },
     "scene_onhtml": {
         "selector": "html",
+        "parser": "ddfnetwork.tengo",
         "needed_vars": [
             {
                 "var_name": "cast",

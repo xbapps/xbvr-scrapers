@@ -10,6 +10,7 @@
     "start_url": "https://www.vrteenrs.com/vrporn.php",
     "scene_onhtml": {
         "selector": ".list_item",
+        "parser": "vrteens.tengo",
         "needed_vars": [
             {
                 "var_name": "cast",

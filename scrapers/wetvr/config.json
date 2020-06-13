@@ -22,6 +22,7 @@
     },
     "scene_onhtml": {
         "selector": "div#t2019",
+        "parser": "wetvr.tengo",
         "needed_vars": [
             {
                 "var_name": "cast",

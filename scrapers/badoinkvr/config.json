@@ -22,6 +22,7 @@
     },
     "scene_onhtml": {
         "selector": "html",
+        "parser": "badoinkvr.tengo",
         "transfer_to_extra": true,
         "needed_vars": [
             {

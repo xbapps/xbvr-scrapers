@@ -35,15 +35,11 @@ func scrapeDir(dir string, scraperWG *sync.WaitGroup, collectedScenes chan scrap
 	}
 	fmt.Println(scraperFiles)
 
-	_, scraperName := filepath.Split(dir)
-	if funk.Contains(scraperFiles, "config.json") && funk.Contains(scraperFiles, scraperName+".tengo") {
-		configFile := filepath.Join(dir, "config.json")
-		parserFile := filepath.Join(dir, scraperName+".tengo")
+	if funk.Contains(scraperFiles, "config.json") {
 		fmt.Printf("Scraping %s...\n", dir)
-		fmt.Println(configFile, parserFile)
 
 		scraperWG.Add(1)
-		go scrapers.Scrape(scraperWG, configFile, parserFile, collectedScenes)
+		go scrapers.Scrape(scraperWG, dir, collectedScenes)
 	} else {
 		fmt.Printf("%s missing required files. Skipping.\n", dir)
 	}

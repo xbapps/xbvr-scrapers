@@ -1,0 +1,11 @@
+{
+    "scraper_id": "babevr",
+    "site_id": "BabeVR",
+    "studio": "Badoink",
+    "site_icon": "https://babevr.com/babevr_icons/apple-touch-icon.png",
+    "allowed_domains": [
+        "babevr.com"
+    ],
+    "start_url": "https://babevr.com/vrpornvideos",
+    "copy_from": "badoinkvr"
+}

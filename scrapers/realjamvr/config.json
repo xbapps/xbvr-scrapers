@@ -22,6 +22,7 @@
     },
     "scene_onhtml": {
         "selector": "html",
+        "parser": "realjamvr.tengo",
         "needed_vars": [
             {
                 "var_name": "cast",

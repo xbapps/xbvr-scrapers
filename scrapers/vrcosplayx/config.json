@@ -1,0 +1,11 @@
+{
+    "scraper_id": "vrcosplayx",
+    "site_id": "VRCosplayX",
+    "studio": "Badoink",
+    "site_icon": "https://twivatar.glitch.me/vrcosplayx",
+    "allowed_domains": [
+        "vrcosplayx.com"
+    ],
+    "start_url": "https://vrcosplayx.com/cosplaypornvideos",
+    "copy_from": "badoinkvr"
+}
